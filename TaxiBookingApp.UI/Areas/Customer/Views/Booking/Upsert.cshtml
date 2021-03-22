@@ -1,0 +1,417 @@
+﻿@model TaxiBookingApp.Models.Booking
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var title = "New Booking";
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="row p-3 border">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <input type="hidden" asp-for="Latitude" id="hfLat" value="@Model.Latitude" />
+        <input type="hidden" asp-for="Longitude" id="hfLng" value="@Model.Longitude" />
+        <input type="hidden" asp-for="LocationDescription" id="hfLocation" />
+        <input type="hidden" id="hfUid" value="@ViewBag.Uid" />
+
+        @if (Model.Id != 0)
+        {
+            title = "Update Booking";
+        <input type="hidden" id="hfBookingID" asp-for="Id" />
+
+        <div class="col-12 border-bottom">
+            <h2 class="text-primary">Update Booking</h2>
+        </div>
+        }
+
+        else
+        {
+        <div class="col-12 border-bottom">
+            <h2 class="text-primary">New Booking</h2>
+        </div>
+        }
+
+        @{
+        ViewData["Title"] = title;
+        }
+
+        <div class="col-8 pt-4">
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="BookingType"></label>
+                </div>
+                <div class="col-8">
+
+                    <input id="rbNow" asp-for="BookingType" onchange="ShowOrHideDate('Now')" type="radio" value="Now" /> Now
+                    &nbsp;
+                    <input id="rbLater" asp-for="BookingType" onchange="ShowOrHideDate('Later')" type="radio" value="Later" checked /> Later
+
+                </div>
+            </div>
+
+            <div id="divDate" style="display:none">
+
+                <div class="form-group row">
+                    <div class="col-4">
+                        <label asp-for="BookingDate"></label>
+                    </div>
+                    <div class="col-8">
+
+                        @if (Model.Id != 0)
+                        {
+                        <input id="BookingDate" type='text' asp-for="BookingDate" value="@Model.BookingDate.ToString("dd/MM/yyyy")" class="form-control datepicker1" />
+                        }
+                        else
+                        {
+                        <input id="BookingDate" type='text' asp-for="BookingDate" value="" class="form-control datepicker1" />
+                        }
+
+                        <span asp-validation-for="BookingDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="BookingTime"></label>
+                </div>
+                <div class="col-8">
+                    <input id="BookingTime" type='text' asp-for="BookingTime" class="form-control datepicker2" />
+                    <span asp-validation-for="BookingTime" class="text-danger"></span>
+                </div>
+            </div>
+
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label>Location</label>
+                </div>
+                <div class="col-8">
+
+                    <input id="pac-input" class="form-control-sm controls" type="text" placeholder="Enter a location">
+                    <div id="type-selector" class="controls">
+                        <input type="radio" name="type" id="changetype-all" checked="checked">
+
+                    </div>
+                    <div id="map" style="width:450px;height:300px"></div>
+
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-8 offset-4">
+                    @if (Model.Id != 0)
+                    {
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn btn-primary form-control" onclick="return validateInput()" type="button">
+                                <i class="fas fa-save"></i>
+                                Update
+                            </button>
+
+                        </div>
+
+                        <div class="col">
+                            <a asp-action="Index" class="btn btn-success form-control">Back to List</a>
+                        </div>
+                    </div>
+                    }
+                    else
+                    {
+                    <div class="row">
+                        <div class="col">
+
+                            <button class="btn btn-primary form-control" onclick="return validateInput()" type="button">
+                                <i class="fas fa-save"></i>
+                                Submit
+                            </button>
+                        </div>
+
+                        <div class="col">
+                            <a asp-action="Index" class="btn btn-success form-control">Back to List</a>
+                        </div>
+                    </div>
+
+                    }
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVO13si6jgRdQxO24cqtbEbdD1YOZyer4&libraries=places&callback=initMap"
+            type="text/javascript"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            if ($('#hfBookingID').val() != "0") {
+                ShowOrHideDate('Later');
+            }
+
+            else {
+                ShowOrHideDate('Now');
+            }
+
+            $('.datepicker1').datetimepicker({
+                format: 'DD/MM/YYYY',
+                widgetPositioning: {
+                    horizontal: 'auto',
+                    vertical: 'bottom'
+                }
+            });
+
+            $('.datepicker2').datetimepicker({
+                format: 'hh:mm a',
+                widgetPositioning: {
+                    horizontal: 'auto',
+                    vertical: 'bottom'
+                }
+            });
+
+        });
+
+        function GetCurrentDate() {
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            var yyyy = today.getFullYear();
+
+            today = dd + '/' + mm + '/' + yyyy;
+
+            $('.datepicker1').val(today);
+        }
+
+        function initMap() {
+
+            var customLat = parseFloat(document.getElementById('hfLat').value);
+            var customLng = parseFloat(document.getElementById('hfLng').value);
+
+            if (customLat == "0") {
+                customLat = 25.1988;
+                customLng = 55.2796;
+            }
+
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: {
+                    lat: customLat,
+                    lng: customLng
+                },
+                zoom: 13
+            });
+            var input = (document.getElementById('pac-input'));
+
+            var types = document.getElementById('type-selector');
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(types);
+
+            var autocomplete = new google.maps.places.Autocomplete(input);
+            autocomplete.bindTo('bounds', map);
+
+            var infowindow = new google.maps.InfoWindow();
+            var marker = new google.maps.Marker({
+                map: map,
+                anchorPoint: new google.maps.Point(0, -29)
+            });
+
+            autocomplete.addListener('place_changed', function () {
+                infowindow.close();
+                marker.setVisible(false);
+                var place = autocomplete.getPlace();
+                if (!place.geometry) {
+                    window.alert("Autocomplete's returned place contains no geometry");
+                    return;
+                }
+
+                document.getElementById('hfLat').value = place.geometry.location.lat();
+                document.getElementById('hfLng').value = place.geometry.location.lng();
+                document.getElementById('hfLocation').value = place.name;
+
+                // If the place has a geometry, then present it on a map.
+                if (place.geometry.viewport) {
+                    map.fitBounds(place.geometry.viewport);
+                } else {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(17); // Why 17? Because it looks good.
+                }
+                marker.setIcon(({
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(35, 35)
+                }));
+                marker.setPosition(place.geometry.location);
+                marker.setVisible(true);
+
+                var address = '';
+                if (place.address_components) {
+                    address = [
+                        (place.address_components[0] && place.address_components[0].short_name || ''),
+                        (place.address_components[1] && place.address_components[1].short_name || ''),
+                        (place.address_components[2] && place.address_components[2].short_name || '')
+                    ].join(' ');
+                }
+
+                infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+                infowindow.open(map, marker);
+            });
+
+            // Sets a listener on a radio button to change the filter type on Places
+            // Autocomplete.
+            function setupClickListener(id, types) {
+                var radioButton = document.getElementById(id);
+                radioButton.addEventListener('click', function () {
+                    autocomplete.setTypes(types);
+                });
+            }
+
+            setupClickListener('changetype-all', []);
+            setupClickListener('changetype-address', ['address']);
+            setupClickListener('changetype-establishment', ['establishment']);
+            setupClickListener('changetype-geocode', ['geocode']);
+        }
+
+        //initMap();
+
+        function ShowOrHideDate(bookingType) {
+
+            var divDate = document.getElementById('divDate');
+
+            if (bookingType == 'Now') {
+                divDate.style.display = "none";
+                GetCurrentDate();
+            }
+
+            else {
+                divDate.style.display = "block";
+                //$('.datepicker1').val('');
+            }
+
+        }
+
+        function ShowSuccess(BookingNo) {
+
+            swal({
+                title: "Booking Confirmation",
+                text: "Your booking is confirmed with Booking No : " + BookingNo,
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                icon: "success"
+            }).then(function () {
+                window.location = "/Customer/Booking";
+            });
+        }
+
+        function ShowFailure(Message) {
+
+            swal("Error", Message, "error");
+        }
+
+        function validateInput() {
+
+            var hfLat = document.getElementById('hfLat');
+            var hfLng = document.getElementById('hfLng');
+
+            if (hfLat.value == "" || hfLat.value == "0" || hfLng.value == "" || hfLng.value == "0") {
+                swal("Error", "Please select your location.", "error");
+                return false;
+            }
+
+            //if (document.getElementById("uploadBox").value == "") {
+            //    swal("Error", "Please upload your emirates id.", "error");
+            //    return false;
+            //}
+
+            else {
+                Save();
+                return true;
+            }
+        }
+
+        function Save() {
+
+            var ApplicationUserID = $('#hfUid').val();
+            var BookingType = 'Now';
+
+            if ($('#rbLater').is(':checked'))
+                BookingType = 'Later';
+
+            var Latitude = $('#hfLat').val();
+            var Longitude = $('#hfLng').val();
+            var LocationDescription = $('#hfLocation').val();
+            var BookingDateStr = $('#BookingDate').val();
+            var BookingTime = $('#BookingTime').val();
+            var BookingStatus = 'Scheduled';
+
+            var dateString = BookingDateStr;
+            var dateParts = dateString.split("/");
+
+            // month is 0-based, that's why we need dataParts[1] - 1
+            var BookingDate = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
+
+            var dt = {
+                ApplicationUserID: ApplicationUserID,
+                BookingType: BookingType,
+                Latitude: parseFloat(Latitude),
+                Longitude: parseFloat(Longitude),
+                LocationDescription: LocationDescription,
+                BookingDate: BookingDate,
+                BookingTime: BookingTime,
+                BookingStatus: BookingStatus
+            }
+
+            //update
+            if ($('#hfBookingID').val() != "0" && $('#hfBookingID').val() != undefined) {
+
+                $.ajax({
+                    type: "PUT",
+                    crossDomain: true,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dt),
+                    url: 'http://localhost:45235/api/Booking/' + $('#hfBookingID').val(),
+                    
+                    success: function (data) {
+                        ShowSuccess(data);
+                    }
+                });
+            }
+
+            else {
+                $.ajax({
+                    type: "POST",
+                    crossDomain: true,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dt),
+                    url: 'http://localhost:45235/api/Booking',
+                    success: function (data) {
+                        ShowSuccess(data);
+                    }
+                });
+            }
+        }
+
+    </script>
+
+    @if (ViewBag.JavaScriptFunction != null)
+    {
+    <script>
+            @Html.Raw(ViewBag.JavaScriptFunction)
+    </script>
+    }
+
+}
+
+
+

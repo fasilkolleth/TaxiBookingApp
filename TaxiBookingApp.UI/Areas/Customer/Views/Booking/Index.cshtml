@@ -1,0 +1,284 @@
+﻿@using TaxiBookingApp.Utility;
+
+@{
+    ViewData["Title"] = "Bookings";
+}
+
+@if (User.IsInRole(SD.Role_User_Admin))
+{
+    <input type="hidden" id="hfUserRole" value="Admin" />
+}
+
+else
+{
+    <input type="hidden" id="hfUserRole" value="Normal User" />
+}
+
+<input type="hidden" id="hfUid" value="@ViewBag.Uid" />
+
+<br />
+
+<div class="row">
+    <div class="col-6">
+        <h2>Bookings</h2>
+    </div>
+
+    <div class="col-6 text-right">
+        <a class="btn btn-primary" asp-action="Upsert"><i class="fas fa-plus"></i>&nbsp;New Booking</a>
+    </div>
+
+</div>
+
+<br />
+
+<div class="row">
+
+    <input type="hidden" id="hfLat" value="25.1988" />
+    <input type="hidden" id="hfLng" value="55.2796" />
+
+    <div class="col-12">
+        <div class="card mt-3 tab-card">
+            <div class="card-header tab-card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="one-tab" data-toggle="tab" href="#one" role="tab" aria-controls="One" aria-selected="true">Upcoming</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="two-tab" data-toggle="tab" href="#two" role="tab" aria-controls="Two" aria-selected="false">Previous</a>
+                    </li>
+
+                </ul>
+            </div>
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active p-3" id="one" role="tabpanel" aria-labelledby="one-tab">
+                    @*<h5 class="card-title">Upcoming Bookings</h5>*@
+
+                    <table id="tblUpcoming" class="table table-striped table-bordered" style="width:100%">
+                        <thead class="thead-dark">
+
+                            @if (User.IsInRole(SD.Role_User_Admin))
+                            {
+                                <tr class="table-info">
+                                    <th>Booking No.</th>
+                                    <th>Booking Type</th>
+                                    <th>Booking Time</th>
+                                    <th>Customer</th>
+                                    <th>Location</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            }
+
+                            else
+                            {
+                                <tr class="table-info">
+                                    <th>Booking No.</th>
+                                    <th>Booking Type</th>
+                                    <th>Booking Time</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                    <th></th>
+
+                                </tr>
+                            }
+
+                        </thead>
+
+                    </table>
+
+                </div>
+                <div class="tab-pane fade p-3" id="two" role="tabpanel" aria-labelledby="two-tab">
+                    @*<h5 class="card-title">Previous Bookings</h5>*@
+
+                    <table id="tblPrevious" class="table table-striped table-bordered" style="width:100%">
+                        <thead class="thead-dark">
+
+                            @if (User.IsInRole(SD.Role_User_Admin))
+                            {
+                                <tr class="table-info">
+                                    <th>Booking No.</th>
+                                    <th>Booking Type</th>
+                                    <th>Booking Time</th>
+                                    <th>Customer</th>
+                                    <th>Location</th>
+                                    <th></th>
+                                    <th></th>
+                                    
+                                </tr>
+                            }
+
+                            else
+                            {
+                                <tr class="table-info">
+                                    <th>Booking No.</th>
+                                    <th>Booking Type</th>
+                                    <th>Booking Time</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                    <th></th>
+
+                                </tr>
+                            }
+
+                        </thead>
+
+                    </table>
+
+                    @*<a href="#" class="btn btn-primary">Go somewhere</a>*@
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="locationModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title" id="myModalLabel">Location</h4>
+            </div>
+            <div class="modal-body">
+                <div id="partial">
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <div id="map" style="width:450px;height:300px"></div>
+
+                        </div>
+
+                    </div>
+
+                    <br />
+
+                    <div class="form-actions" style="border-top:none">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <a href="javascript:void();" data-dismiss="modal" class="btn btn-danger">
+                                    <i class="fas fa-times"></i>
+                                    Close
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="emiratesIDModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title" id="myModalLabel">Emirates ID</h4>
+            </div>
+            <div class="modal-body">
+                <div id="partial">
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <img id="imgEmiratesID" class="img-fluid" src="~/files/emiratesid/sample.jpg" />
+
+                        </div>
+
+                    </div>
+
+                    <br />
+
+                    <div class="form-actions" style="border-top:none">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <a href="javascript:void();" data-dismiss="modal" class="btn btn-danger">
+                                    <i class="fas fa-times"></i>
+                                    Close
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/booking.js"></script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVO13si6jgRdQxO24cqtbEbdD1YOZyer4&libraries=places&callback=initMap"
+            type="text/javascript"></script>
+
+    <script>
+
+        function initMap() {
+
+            var customLat = parseFloat(document.getElementById('hfLat').value);
+            var customLng = parseFloat(document.getElementById('hfLng').value);
+
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: {
+                    lat: customLat,
+                    lng: customLng
+                },
+                zoom: 13
+            });
+
+            var infowindow = new google.maps.InfoWindow();
+            var marker = new google.maps.Marker({
+                map: map,
+                anchorPoint: new google.maps.Point(0, -29)
+            });
+
+        }
+
+        //initMap();
+
+        function GetLocation(lat, lng) {
+            $("#hfLat").val(lat);
+            $("#hfLng").val(lng);
+
+            initMap();
+
+            $('#locationModal').modal('show');
+
+        }
+
+        function GetEmiratesID(emiratesID) {
+
+            $('#emiratesIDModal').modal('show');
+
+            $('#imgEmiratesID').attr("src", "/files/emiratesid/" + emiratesID);
+
+        }
+
+        function UpdateStatus(url) {
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                success: function (data) {
+                    if (data.success) {
+                        toastr.success(data.message);
+                        window.location.reload();
+                    }
+
+                    else {
+                        toastr.error(data.message);
+                    }
+                }
+            })
+        }
+
+    </script>
+
+}
+
+
+

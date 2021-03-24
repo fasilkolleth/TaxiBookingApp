@@ -128,7 +128,7 @@ namespace TaxiBookingApp.API.Controllers
                 _unitOfWork.BookingRepository.Update(booking);
                 _unitOfWork.Save();
 
-                return Ok("Updated");
+                return Ok(id);
             }
             catch (Exception)
             {

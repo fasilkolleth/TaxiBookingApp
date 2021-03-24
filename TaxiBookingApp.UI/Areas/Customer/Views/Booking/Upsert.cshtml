@@ -299,17 +299,31 @@
 
         }
 
-        function ShowSuccess(BookingNo) {
+        function ShowSuccess(BookingNo, EntryType) {
 
-            swal({
-                title: "Booking Confirmation",
-                text: "Your booking is confirmed with Booking No : " + BookingNo,
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                icon: "success"
-            }).then(function () {
-                window.location = "/Customer/Booking";
-            });
+            if (EntryType == "Save") {
+                swal({
+                    title: "Booking Confirmation",
+                    text: "Your booking is confirmed with Booking No : " + BookingNo,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    icon: "success"
+                }).then(function () {
+                    window.location = "/Customer/Booking";
+                });
+            }
+
+            else {
+                swal({
+                    title: "Booking Update",
+                    text: "Your booking with Booking No : " + BookingNo + " is updated.",
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    icon: "success"
+                }).then(function () {
+                    window.location = "/Customer/Booking";
+                });
+            }
         }
 
         function ShowFailure(Message) {
@@ -358,7 +372,7 @@
 
             var date = BookingDateStr;
             var BookingDate = date.split("/").reverse().join("-");
-            
+
             var dt = {
                 ApplicationUserID: ApplicationUserID,
                 BookingType: BookingType,
@@ -375,17 +389,14 @@
 
                 $.ajax({
                     type: "PUT",
-                    crossDomain: true,
                     dataType: 'json',
+                    crossDomain: true,
                     contentType: 'application/json',
                     data: JSON.stringify(dt),
                     url: 'http://localhost:45235/api/Booking/' + $('#hfBookingID').val(),
-                    
-                    success: function () {
 
-                        alert(1);
-
-                        //ShowSuccess(data);
+                    success: function (data) {
+                        ShowSuccess(data, "Update");
                     }
                 });
             }
@@ -399,7 +410,7 @@
                     data: JSON.stringify(dt),
                     url: 'http://localhost:45235/api/Booking',
                     success: function (data) {
-                        ShowSuccess(data);
+                        ShowSuccess(data, "Save");
                     }
                 });
             }

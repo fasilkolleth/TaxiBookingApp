@@ -147,9 +147,6 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVO13si6jgRdQxO24cqtbEbdD1YOZyer4&libraries=places&callback=initMap"
-            type="text/javascript"></script>
-
     <script>
 
         $(document).ready(function () {
@@ -417,6 +414,9 @@
         }
 
     </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVO13si6jgRdQxO24cqtbEbdD1YOZyer4&libraries=places&callback=initMap"
+            type="text/javascript"></script>
 
     @if (ViewBag.JavaScriptFunction != null)
     {

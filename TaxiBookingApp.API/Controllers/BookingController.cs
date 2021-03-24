@@ -113,6 +113,11 @@ namespace TaxiBookingApp.API.Controllers
         {
             try
             {
+                string BookingDateStr = booking.BookingDate.ToString("dd/MM/yyyy");
+                string BookingTimeStr = booking.BookingTime;
+                DateTime BookingDateWithTime = DateTime.ParseExact(BookingDateStr + " " + BookingTimeStr, "dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
+                booking.BookingDate = BookingDateWithTime;
+
                 var bookingFromDB = _unitOfWork.BookingRepository.Get(id);
 
                 if (bookingFromDB == null)
